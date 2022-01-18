@@ -26,6 +26,7 @@ Para o desenvolvimento deste projeto utilizei as seguintes tecnologias:
 - Springfox Swagger2 2.8.0;
 - Spring Data JPA 2.6.0;
 - Jersey Apache Client, Client4, Core 1.19.4;
+- openfeign 3.1.0
 - Gradle 7.3;
 - Lombook;
 - PostgreSql;
