@@ -8,6 +8,7 @@ public interface UsuarioService {
     ResponseEntity<?>  listarTodos();
     ResponseEntity<?> buscarPorId(Long id);
     ResponseEntity<?>  buscarPorNome(String nome);
+    ResponseEntity<?>  buscarPorEmail(String email);
     ResponseEntity<?> salvar(UsuarioDTO usuarioDTO);
     ResponseEntity<?> remover(UsuarioDTO usuarioDTO);
 

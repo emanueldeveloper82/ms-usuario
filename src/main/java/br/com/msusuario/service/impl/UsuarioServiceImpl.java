@@ -45,6 +45,20 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
     }
 
+    @Override
+    public ResponseEntity<?> buscarPorEmail(String email) {
+        Optional<Usuario> usuarioOptional = Optional.empty();
+
+        if(!email.isBlank()) {
+            usuarioOptional = repository.findByEmail(email);
+        }
+
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("Não foi possível localizar usuario.");
+        }
+        return ResponseEntity.of(usuarioOptional);
+    }
+
     /**
      * Método responsável por buscar um usuario por nome;
      * @param nome
