@@ -37,11 +37,23 @@ public class UsuarioController {
         return ResponseEntity.ok().body(service.listarTodos());
     }
 
-    @GetMapping("/{id}")
-    @ApiOperation(value = "Retorna um usuario.")
-    public ResponseEntity<?> buscarPorId(@PathVariable(value = "id") long id) {
-        return ResponseEntity.ok().body(service.buscarPorId(id));
+//    @GetMapping("/{id}")
+//    @ApiOperation(value = "Retorna um usuariopelo id.")
+//    public ResponseEntity<?> buscarPorId(@PathVariable(value = "id") long id) {
+//        return ResponseEntity.ok().body(service.buscarPorId(id));
+//    }
+
+    @GetMapping("/{email}")
+    @ApiOperation(value = "Retorna um usuario pelo e-mail.")
+    public ResponseEntity<?> buscarPorEmail(@PathVariable(value = "email") String email) {
+        return ResponseEntity.ok().body(service.buscarPorEmail(email));
     }
+
+//    @GetMapping("/{nome}")
+//    @ApiOperation(value = "Retorna um usuario.")
+//    public ResponseEntity<?> buscarPorNome(@PathVariable(value = "nome") String nome) {
+//        return ResponseEntity.ok().body(service.buscarPorNome(nome));
+//    }
 
     @PostMapping("/salvar")
     @ApiOperation(value = "Salvar um usuario")
