@@ -6,13 +6,11 @@ plugins {
 }
 
 group = 'br.com.ms-usuario'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+version = '1.0.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
-mainClassName = 'br.com.ms-usuario.MsUsuarioApplication'
 
 configurations {
 	compileOnly {
