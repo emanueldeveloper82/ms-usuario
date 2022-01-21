@@ -1,6 +1,7 @@
 package br.com.msusuario.controller;
 
 import br.com.msusuario.dto.UsuarioDTO;
+import br.com.msusuario.entity.Usuario;
 import br.com.msusuario.service.UsuarioService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,36 +40,39 @@ public class UsuarioController {
         return ResponseEntity.ok().body(service.listarTodos());
     }
 
-//    @GetMapping("/{id}")
-//    @ApiOperation(value = "Retorna um usuariopelo id.")
-//    public ResponseEntity<?> buscarPorId(@PathVariable(value = "id") long id) {
-//        return ResponseEntity.ok().body(service.buscarPorId(id));
-//    }
-
     @GetMapping("/{email}")
     @ApiOperation(value = "Retorna um usuario pelo e-mail.")
     public ResponseEntity<?> buscarPorEmail(@PathVariable(value = "email") String email) {
-        return ResponseEntity.ok().body(service.buscarPorEmail(email));
+        log.info("Buscando e-mail do usuario.");
+        return service.buscarPorEmail(email);
     }
-
-//    @GetMapping("/{nome}")
-//    @ApiOperation(value = "Retorna um usuario.")
-//    public ResponseEntity<?> buscarPorNome(@PathVariable(value = "nome") String nome) {
-//        return ResponseEntity.ok().body(service.buscarPorNome(nome));
-//    }
 
     @PostMapping("/salvar")
     @ApiOperation(value = "Salvar um usuario")
     public ResponseEntity<?> salvar(@Valid @RequestBody UsuarioDTO usuarioDTO) {
-        log.info("Salvar usuario");
-        return ResponseEntity.ok().body(service.salvar(usuarioDTO));
+        log.info("Salvar usuario.");
+
+        Optional<Usuario> usuarioOptional = service.salvar(usuarioDTO);
+
+        if (!usuarioOptional.isEmpty()){
+            log.info("Salvo com sucesso.");
+            return ResponseEntity.ok(modelMapper.map(usuarioOptional.get(), UsuarioDTO.class));
+        }
+        return ResponseEntity.badRequest().body("Erro ao tentar salvar o usuário.");
     }
 
     @PutMapping("/atualizar")
     @ApiOperation(value = "Atualizar um usuario")
     public ResponseEntity<?> atualizar(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         log.info("Atualizar usuario");
-        return ResponseEntity.ok(service.salvar(usuarioDTO));
+
+        Optional<Usuario> usuarioOptional = service.salvar(usuarioDTO);
+
+        if (!usuarioOptional.isEmpty()){
+            log.info("Salvo com sucesso.");
+            return ResponseEntity.ok(modelMapper.map(usuarioOptional.get(), UsuarioDTO.class));
+        }
+        return ResponseEntity.badRequest().body("Erro ao tentar salvar o usuário.");
     }
 
     @DeleteMapping("/excluir")
