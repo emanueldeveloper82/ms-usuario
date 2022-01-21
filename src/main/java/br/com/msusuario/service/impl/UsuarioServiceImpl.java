@@ -4,10 +4,13 @@ import br.com.msusuario.dto.UsuarioDTO;
 import br.com.msusuario.entity.Usuario;
 import br.com.msusuario.repository.UsuarioRepository;
 import br.com.msusuario.service.UsuarioService;
+import br.com.msusuario.utils.Constantes;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,11 +20,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository repository;
     private final ModelMapper modelMapper;
 
+    /**
+     * Método que retorna uma lista de usuários;
+     * @return
+     */
     @Override
-    public ResponseEntity<?> listarTodos() {
-        return ResponseEntity.ok()
-                .body(repository.findAll().stream()
-                        .map(val->modelMapper.map(val, UsuarioDTO.class)));
+    public List<Usuario> listarTodos() {
+        return repository.findAll();
     }
 
     /**
@@ -30,7 +35,7 @@ public class UsuarioServiceImpl implements UsuarioService {
      * @return ResponseEntity
      */
     @Override
-    public ResponseEntity<?> buscarPorId(Long id) {
+    public Optional<Usuario> buscarPorId(Long id) {
 
         Optional<Usuario> usuarioOptional = Optional.empty();
 
@@ -38,25 +43,28 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuarioOptional = repository.findById(id);
         }
 
-        if (!usuarioOptional.isEmpty()) {
-            return ResponseEntity.ok().body(modelMapper.map(usuarioOptional.get(), UsuarioDTO.class));
-        } else {
-            return ResponseEntity.badRequest().body("Não foi possível localizar um usuario.");
-        }
+        return usuarioOptional;
     }
 
     @Override
     public ResponseEntity<?> buscarPorEmail(String email) {
-        Optional<Usuario> usuarioOptional = Optional.empty();
 
         if(!email.isBlank()) {
-            usuarioOptional = repository.findByEmail(email);
+            try {
+                Optional<Usuario> usuarioOptional = repository.findByEmail(email);
+                if (usuarioOptional.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body(usuarioOptional);
+                }
+                return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                        .body(Constantes.USUARIO_NAO_ENCONTRADO);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(Constantes.ERRO_INTERNO);
+            }
         }
 
-        if (usuarioOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("Não foi possível localizar usuario.");
-        }
-        return ResponseEntity.of(usuarioOptional);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body("Campo e-mail vazio ou inválido. ");
     }
 
     /**
@@ -65,7 +73,7 @@ public class UsuarioServiceImpl implements UsuarioService {
      * @return
      */
     @Override
-    public ResponseEntity<?> buscarPorNome(String nome) {
+    public Optional<Usuario> buscarPorNome(String nome) {
 
         Optional<Usuario> usuarioOptional = Optional.empty();
 
@@ -73,12 +81,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuarioOptional = repository.findByNome(nome);
         }
 
-        if (usuarioOptional.isEmpty()) {
-            return ResponseEntity.ok().body(repository.findByNome(nome));
-
-        } else {
-            return ResponseEntity.badRequest().body("Não foi possível localizar usuario.");
-        }
+        return usuarioOptional;
 
     }
 
@@ -89,7 +92,7 @@ public class UsuarioServiceImpl implements UsuarioService {
      * @return
      */
     @Override
-    public ResponseEntity<?> salvar(UsuarioDTO usuarioDTO) {
+    public Optional<Usuario> salvar(UsuarioDTO usuarioDTO) {
 
         Optional<Usuario> usuarioOptional = Optional.empty();
 
@@ -98,13 +101,13 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         if (usuarioOptional.isEmpty()) {
-            return ResponseEntity.ok().body(repository.save(modelMapper.map(usuarioDTO, Usuario.class)));
+           return Optional.of(repository.save(modelMapper.map(usuarioDTO, Usuario.class)));
         } else {
             if (usuarioOptional.get().getId().equals(usuarioDTO.getId())) {
                 usuarioDTO.setDataCadastro(usuarioOptional.get().getDataCadastro());
-                return ResponseEntity.ok().body(repository.save(modelMapper.map(usuarioDTO, Usuario.class)));
+                return Optional.of(repository.save(modelMapper.map(usuarioDTO, Usuario.class)));
             }
-            return ResponseEntity.badRequest().body(UsuarioDTO.class);
+            return usuarioOptional;
         }
     }
 
@@ -119,11 +122,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         if (usuarioOptional.isEmpty()) {
             repository.delete(modelMapper.map(usuarioDTO, Usuario.class));
-            return ResponseEntity.ok().body(UsuarioDTO.class);
+            return ResponseEntity.ok().body("Usuário removido com sucesso.");
         } else {
-            return ResponseEntity.badRequest().body(UsuarioDTO.class);
+            return ResponseEntity.badRequest().body("Erro ao tentar excluir o usuário.");
         }
     }
-
 
 }
